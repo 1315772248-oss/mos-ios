@@ -1,0 +1,55 @@
+name: Build iOS IPA
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: macos-26          # 关键：Xcode 26，满足 Capacitor 8 要求
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22      # Capacitor 8 要求 Node 22+
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build Next.js
+        run: pnpm build
+
+      - name: Add iOS Platform (首次运行)
+        run: npx cap add ios || true
+
+      - name: Sync Capacitor iOS
+        run: npx cap sync ios
+
+      - name: Build Xcode Project (Unsigned)
+        run: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath $PWD/build/App.xcarchive \
+            archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      - name: Package into IPA
+        run: |
+          cd ios/App
+          mkdir -p build/Payload
+          cp -r build/App.xcarchive/Products/Applications/App.app build/Payload/
+          cd build
+          zip -r MOS.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MOS-Unsigned-IPA
+          path: ios/App/build/MOS.ipa
