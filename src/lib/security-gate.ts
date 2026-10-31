@@ -7,6 +7,14 @@ export class SecurityGate {
     this.hitlResolver = resolver;
   }
 
+  // 新增：用于前端按钮点击时触发结果的方法
+  resolveHitl(approved: boolean) {
+    if (this.hitlResolver) {
+      this.hitlResolver(approved);
+      this.hitlResolver = null; // 触发后清空，防止重复调用
+    }
+  }
+
   async gate(action: {
     type: string;
     risk_tier?: string;
@@ -24,9 +32,12 @@ export class SecurityGate {
           resolve(approved);
         });
 
+        // 120秒超时自动拒绝
         timeoutId = setTimeout(() => {
-          this.hitlResolver = null;
-          resolve(false);
+          if (this.hitlResolver) {
+            this.hitlResolver = null;
+            resolve(false);
+          }
         }, 120000);
       });
     }

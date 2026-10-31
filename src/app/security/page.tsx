@@ -26,7 +26,7 @@ export default function SecurityPage() {
       <Link href="/" className="text-zinc-400 text-sm">
         ← 返回首页
       </Link>
-      <h1 className="text-xl font-bold">安全审批中心</h1>
+      <h1 className="text-xl font-bold text-white">安全审批中心</h1>
 
       <button
         onClick={triggerHighRisk}
@@ -39,20 +39,22 @@ export default function SecurityPage() {
 
       {pendingAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6">
-          <div className="w-full max-w-sm rounded-xl bg-zinc-900 p-6 space-y-4">
-            <h2 className="text-lg font-bold">⚠️ 安全拦截 (HITL)</h2>
+          <div className="w-full max-w-sm rounded-xl bg-zinc-900 p-6 space-y-4 border border-zinc-700 shadow-xl">
+            <h2 className="text-lg font-bold text-white">⚠️ 安全拦截 (HITL)</h2>
             <p className="text-sm text-zinc-300">{pendingAction}</p>
             <p className="text-xs text-red-400">120 秒未操作将自动拒绝</p>
             <div className="flex gap-2 pt-2">
               <button
-                onClick={() => globalGate.setHitlResolver?.(false)}
-                className="flex-1 rounded-md bg-zinc-800 py-2 active:bg-zinc-700"
+                // 改用 resolveHitl(false)
+                onClick={() => globalGate.resolveHitl(false)}
+                className="flex-1 rounded-md bg-zinc-800 py-2 text-white active:bg-zinc-700"
               >
                 拒绝
               </button>
               <button
-                onClick={() => globalGate.setHitlResolver?.(true)}
-                className="flex-1 rounded-md bg-cyan-600 py-2 active:bg-cyan-700"
+                // 改用 resolveHitl(true)
+                onClick={() => globalGate.resolveHitl(true)}
+                className="flex-1 rounded-md bg-cyan-600 py-2 text-white active:bg-cyan-700"
               >
                 批准
               </button>

@@ -8,7 +8,9 @@ export async function saveApiKey(key: string): Promise<void> {
 
 export async function getApiKey(): Promise<string | null> {
   try {
-    return await SecureStorage.get(KEYCHAIN_KEY);
+    const val = await SecureStorage.get(KEYCHAIN_KEY);
+    // 强制转换为字符串，解决 TypeScript 类型报错
+    return val ? String(val) : null;
   } catch {
     return null;
   }
