@@ -3,7 +3,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: macos-26          # 关键：Xcode 26，满足 Capacitor 8 要求
+    runs-on: macos-14
 
     steps:
       - uses: actions/checkout@v4
@@ -11,7 +11,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22      # Capacitor 8 要求 Node 22+
+          node-version: 20
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -24,7 +24,7 @@ jobs:
       - name: Build Next.js
         run: pnpm build
 
-      - name: Add iOS Platform (首次运行)
+      - name: Add iOS Platform
         run: npx cap add ios || true
 
       - name: Sync Capacitor iOS
@@ -33,12 +33,18 @@ jobs:
       - name: Build Xcode Project (Unsigned)
         run: |
           cd ios/App
+          # 清理旧的构建产物
+          rm -rf build/
+          # 执行打包，显式指定 generic/platform=iOS
           xcodebuild -workspace App.xcworkspace \
             -scheme App \
-            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
             -configuration Release \
             -archivePath $PWD/build/App.xcarchive \
-            archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
 
       - name: Package into IPA
         run: |
