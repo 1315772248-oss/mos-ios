@@ -3,7 +3,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: macos-15  # 避免 macos-14 镜像下线导致的 brownout
+    runs-on: macos-15
 
     steps:
       - uses: actions/checkout@v4
@@ -11,7 +11,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22  # 核心修复：Capacitor 8 要求 Node.js 22+
+          node-version: 22
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -34,7 +34,8 @@ jobs:
         run: |
           cd ios/App
           rm -rf build/
-          xcodebuild -workspace App.xcworkspace \
+          # 修改：直接指向 App.xcodeproj，而非 App.xcworkspace
+          xcodebuild -project App.xcodeproj \
             -scheme App \
             -destination 'generic/platform=iOS' \
             -configuration Release \
